@@ -1,4 +1,10 @@
 <div class="center">
-	<div>AngularJS starter application</div>
-	<div>This is Home View</div>
+  <h1>voice</h1>
+  <div style="padding:5%;">
+    <audio controls autoplay></audio>
+    <button ng-click="startRecording()" type="button" value="录音">录音</button>
+    <button ng-click="stopRecording()" type="button" value="停止">停止</button>
+    <button ng-click="playRecording()" type="button" value="播放">播放</button>
+    <button ng-click="uploadAudio()" type="button" value="提交">提交</button>
+  </div>
 </div>

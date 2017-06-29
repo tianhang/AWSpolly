@@ -5,8 +5,11 @@
   "homepage": "https://github.com/popularowl/angular-starter",
   "license": "MIT",
   "dependencies": {
-    "angular": "1.2.x",
-    "angular-route":"1.2.x",
-    "angular-mocks":"1.2.x"
+    "angular": "1.5.x",
+    "angular-route": "1.5.x",
+    "angular-mocks": "1.5.x"
+  },
+  "resolutions": {
+    "angular": "1.5.x"
   }
 }
