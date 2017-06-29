@@ -26,14 +26,46 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
   //App ID: 9817827
   //API Key: enaHkP8m6GeYrbBCGhZGBa7l
   //Secret Key: 3b600586b13902133a20ea79eedfaff0
+
   var self = this;
   init();
 
   function init() {
     initHZRecorder();
-    getAccessToken();
+    //getAccessToken();
   };
 
+
+  function dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(','),
+      mime = arr[0].match(/:(.*?);/)[1],
+      bstr = atob(arr[1]),
+      n = bstr.length,
+      u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  }
+
+  function create_blob(file, callback) {
+    var reader = new FileReader();
+    reader.onload = function() { callback(reader.result) };
+    reader.readAsDataURL(file);
+  }
+
+  var ele = document.getElementById('audioFile');
+  ele.onchange = function(event) {
+    getAccessToken();
+    var fileList = ele.files;
+    console.log(fileList);
+    //TODO do something with fileList. 
+    create_blob(fileList[0], function(dataURL) {
+
+      self.currBlob = dataURLtoBlob(dataURL);
+      console.log(self.currBlob);
+    });
+  }
 
   var recorder;
   var audio = document.querySelector('audio');
@@ -55,10 +87,12 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
 
   $scope.uploadAudio = function() {
     console.log(recorder.getBlob());
+    getAccessToken();
     //var API = "http://vop.baidu.com/server_api";
     var API = "http://localhost:5000/uploadAudio";
+    var token = self.access_token;
     //提交到服务器
-    recorder.upload(API, function(state, e) {
+    recorder.upload(API, token, function(state, e) {
       switch (state) {
         case 'uploading':
           //var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
@@ -75,6 +109,60 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
           break;
       }
     });
+  }
+
+  //上传
+  function uploadFile(url, token, blob, callback) {
+    var fd = new FormData();
+    fd.append("audioData", blob);
+    fd.append("token", token);
+    var xhr = new XMLHttpRequest();
+    if (callback) {
+      xhr.upload.addEventListener("progress", function(e) {
+        callback('uploading', e);
+      }, false);
+      xhr.addEventListener("load", function(e) {
+        callback('ok', e);
+      }, false);
+      xhr.addEventListener("error", function(e) {
+        callback('error', e);
+      }, false);
+      xhr.addEventListener("abort", function(e) {
+        callback('cancel', e);
+      }, false);
+    }
+    xhr.open("POST", url);
+    xhr.send(fd);
+  }
+
+
+  $scope.uploadLocalAudio = function() {
+    console.log("---local--upload---");
+
+    //var API = "http://vop.baidu.com/server_api";
+    var API = "http://localhost:5000/uploadAudio";
+    var token = self.access_token;
+    var blob = self.currBlob;
+    //提交到服务器
+    uploadFile(API, token, blob, function(state, e) {
+      switch (state) {
+        case 'uploading':
+          //var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
+          break;
+        case 'ok':
+          //alert(e.target.responseText);
+          alert("上传成功");
+          break;
+        case 'error':
+          alert("上传失败");
+          break;
+        case 'cancel':
+          alert("上传被取消");
+          break;
+      }
+    });
+
+
   }
 
   $window.GET_TOKEN_CALLBACK = function(data) {
@@ -259,9 +347,11 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
       }
 
       //上传
-      this.upload = function(url, callback) {
+      this.upload = function(url, token, callback) {
         var fd = new FormData();
+        console.log(this.getBlob());
         fd.append("audioData", this.getBlob());
+        fd.append("token", token);
         var xhr = new XMLHttpRequest();
         if (callback) {
           xhr.upload.addEventListener("progress", function(e) {
