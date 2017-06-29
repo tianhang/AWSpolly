@@ -28,6 +28,7 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
   //Secret Key: 3b600586b13902133a20ea79eedfaff0
 
   var self = this;
+  $scope.result = "...";
   init();
 
   function init() {
@@ -71,6 +72,7 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
   var audio = document.querySelector('audio');
 
   $scope.startRecording = function() {
+    getAccessToken();
     HZRecorder.get(function(rec) {
       recorder = rec;
       recorder.start();
@@ -87,7 +89,6 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
 
   $scope.uploadAudio = function() {
     console.log(recorder.getBlob());
-    getAccessToken();
     //var API = "http://vop.baidu.com/server_api";
     var API = "http://localhost:5000/uploadAudio";
     var token = self.access_token;
@@ -98,7 +99,10 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
           //var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
           break;
         case 'ok':
-          //alert(e.target.responseText);
+          console.log("上传成功");
+          $scope.$apply(function() {
+            $scope.result = e.target.responseText;
+          });
           alert("上传成功");
           break;
         case 'error':
@@ -147,10 +151,17 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
     uploadFile(API, token, blob, function(state, e) {
       switch (state) {
         case 'uploading':
-          //var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
+          var percentComplete = Math.round(e.loaded * 100 / e.total) + '%';
+          console.log(percentComplete);
           break;
         case 'ok':
           //alert(e.target.responseText);
+          alert(e.target.responseText);
+          $scope.$apply(function() {
+            $scope.result = e.target.responseText;
+          });
+          console.log("上传成功");
+          console.log(e);
           alert("上传成功");
           break;
         case 'error':
