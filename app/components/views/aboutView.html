@@ -1,4 +1,21 @@
-<div class="center">
-	<div>AngularJS starter application</div>
-	<div>This is About View</div>
+<style>
+  textarea {
+    width: 400px;
+    height: 150px;
+  }
+</style>
+
+<div class="center" style="height:1200px;">
+  <h1>Text</h1>
+  <div style="height:20%;">
+    <div>
+      <textarea ng-model="text"></textarea>
+    </div>
+    <button ng-click="uploadText()" type="button" value="提交">提交</button>
+  </div>
+  <h1>Voice</h1>
+
+  <audio controls ng-src="{{result}}" style="margin-bottom:10%;"></audio>
+  <button ng-click="playRecording()" type="button" value="播放">播放</button>
+
 </div>

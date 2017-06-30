@@ -33,7 +33,6 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
 
   function init() {
     initHZRecorder();
-    //getAccessToken();
   };
 
 
