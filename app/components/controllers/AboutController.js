@@ -25,8 +25,40 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
   var self = this;
   init();
 
+  // Get the video element with id="myVideo"
+  var vid = document.getElementById("myVideo");
+
+  // Attach a "timeupdate" event to the video
+  vid.addEventListener("timeupdate", getCurTime);
+
+  vid.onplay = function() {
+    myTimer();
+
+  };
+  // Display the current playback position of the video in a p element with id="demo"
+  function getCurTime() {
+    //document.getElementById("demo").innerHTML = "The current playback position is " + vid.currentTime + " seconds.";
+    //console.log(vid.currentTime * 1000)
+    var currtime = vid.currentTime * 1000;
+  }
+
+  function myTimer() {
+    setInterval(function() {
+      //console.log(vid.currentTime * 1000); // will get you a lot more updates.
+      var time = parseInt(vid.currentTime * 1000);
+      console.log(markMap[time]);
+    }, 1);
+  }
+
+  $scope.playRecording = function() {
+    console.log('play..');
+  }
+
+
+
+
   function init() {
-    getAccessToken();
+    //getAccessToken();
   };
 
   function getAccessToken() {
@@ -41,14 +73,46 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
       console.log(error);
     });
   }
+  var markMap = {};
+
+  function getSpeechMark(txt) {
+    var conf = {
+      url: "http://localhost:3000/marks",
+      method: 'POST',
+      data: { text: txt }
+    }
+    $http(conf).then(function(data) {
+      console.log("marks:", data.data);
+      //console.log("json:", JSON.parse(data.data));
+      //self.access_token = data.data.access_token;
+      var marks = data.data;
+      var markList = (marks.split('\n'));
+      console.log(markList);
+
+      markList.forEach(function(item) {
+        if (item.length) {
+          var obj = JSON.parse(item);
+          if (obj.type == "word") {
+            var tm = parseInt(obj.time)
+            markMap[tm] = obj.value;
+          }
+        }
+      });
+      console.log(markMap);
+      console.log("----");
+    }, function(error) {
+      console.log(error);
+    });
+  }
 
   $scope.uploadText = function() {
     console.log($scope.text);
     //var API = "http://vop.baidu.com/server_api";
-    var API = "http://localhost:5000/uploadText";
+    var API = "http://localhost:3000/tts";
     var token = self.access_token;
     var text = $scope.text;
     //提交到服务器
+    getSpeechMark(text);
     uploadFile(API, token, text, function(state, e) {
       switch (state) {
         case 'uploading':
@@ -59,9 +123,11 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
           //alert(e.target.responseText);
           //alert(e.target.responseText);
           $scope.$apply(function() {
-            console.log(e.target.responseText);
+            //console.log(e.target.responseText);
             //$scope.result = window.URL.createObjectURL(e.target.responseText);
-            $scope.result = e.target.responseText;
+            var base64 = "data:audio/mpeg;base64,";
+            $scope.result = base64 + e.target.responseText;
+            //console.log($scope.result);
           });
           console.log("上传成功");
           console.log(e);
@@ -76,7 +142,6 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
       }
     });
   }
-
 
   //上传
   function uploadFile(url, token, text, callback) {

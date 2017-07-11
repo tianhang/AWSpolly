@@ -89,7 +89,8 @@ angular.module('mostPopularListingsApp.home', ['ngRoute'])
   $scope.uploadAudio = function() {
     console.log(recorder.getBlob());
     //var API = "http://vop.baidu.com/server_api";
-    var API = "http://localhost:5000/uploadAudio";
+    //var API = "http://localhost:5000/uploadAudio";
+    var API = "http://localhost:3000/tts";
     var token = self.access_token;
     //提交到服务器
     recorder.upload(API, token, function(state, e) {
