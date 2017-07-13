@@ -23,7 +23,7 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
   // neccesarry settings and assignments to be run once
   // controller is invoked
   var self = this;
-  init();
+  //init();
 
   // Get the video element with id="myVideo"
   var vid = document.getElementById("myVideo");
@@ -57,9 +57,30 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
 
 
 
-  function init() {
+  function initMp3(url, lrc) {
     //getAccessToken();
+    self.ap = new APlayer({
+      element: document.getElementById('player1'), // Optional, player element
+      narrow: false, // Optional, narrow style
+      autoplay: false, // Optional, autoplay song(s), not supported by mobile browsers
+      showlrc: 1, // Optional, show lrc, can be 0, 1, 2, see: ###With lrc
+      mutex: true, // Optional, pause other players when this player playing
+      theme: '#ad7a86', // Optional, theme color, default: #b7daff
+      mode: 'order', // Optional, play mode, can be `random` `single` `circulation`(loop) `order`(no loop), default: `circulation`
+      preload: 'metadata', // Optional, the way to load music, can be 'none' 'metadata' 'auto', default: 'auto'
+      listmaxheight: '513px', // Optional, max height of play list
+      music: { // Required, music info, see: ###With playlist
+        title: 'Text to Speech', // Required, music title
+        author: 'Joanna', // Required, music author
+        url: url, // Required, music url
+        pic: 'http://devtest.qiniudn.com/Preparation.jpg', // Optional, music picture
+        lrc: lrc // Optional, lrc, see: ###With lrc
+      }
+    });
   };
+
+
+
 
   function getAccessToken() {
     var conf = {
@@ -82,28 +103,41 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
       data: { text: txt }
     }
     $http(conf).then(function(data) {
-      console.log("marks:", data.data);
+      //console.log("marks:", data.data);
       //console.log("json:", JSON.parse(data.data));
       //self.access_token = data.data.access_token;
       var marks = data.data;
       var markList = (marks.split('\n'));
-      console.log(markList);
+      // console.log(markList);
 
+      var lyricsStr = "";
       markList.forEach(function(item) {
         if (item.length) {
           var obj = JSON.parse(item);
+          // || obj.type == "word"
           if (obj.type == "word") {
             var tm = parseInt(obj.time)
-            markMap[tm] = obj.value;
+              // markMap[tm] = obj.value;
+            console.log(tm);
+            console.log(tm / 1000);
+            console.log(formatSeconds(tm / 1000));
+            var lyTime = formatSeconds(tm / 1000);
+            var item = "[" + lyTime + "]" + obj.value + "\n";
+            lyricsStr += item;
           }
         }
       });
-      console.log(markMap);
+
+      console.log(lyricsStr);
+      //console.log($scope.result);
+      initMp3($scope.result, lyricsStr);
       console.log("----");
     }, function(error) {
       console.log(error);
     });
   }
+
+
 
   $scope.uploadText = function() {
     console.log($scope.text);
@@ -112,7 +146,7 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
     var token = self.access_token;
     var text = $scope.text;
     //提交到服务器
-    getSpeechMark(text);
+
     uploadFile(API, token, text, function(state, e) {
       switch (state) {
         case 'uploading':
@@ -128,6 +162,7 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
             var base64 = "data:audio/mpeg;base64,";
             $scope.result = base64 + e.target.responseText;
             //console.log($scope.result);
+            getSpeechMark(text);
           });
           console.log("上传成功");
           console.log(e);
@@ -165,5 +200,22 @@ angular.module('mostPopularListingsApp.about', ['ngRoute'])
     }
     xhr.open("POST", url);
     xhr.send(fd);
+  }
+
+  function formatSeconds(seconds, format) {
+    var ms = Math.floor((seconds * 1000) % 1000);
+    var s = Math.floor(seconds % 60);
+    var m = Math.floor((seconds * 1000 / (1000 * 60)) % 60);
+    var strFormat = format || "MM:SS.XX";
+
+    if (s < 10) s = "0" + s;
+    if (m < 10) m = "0" + m;
+    if (ms < 10) ms = "0" + ms;
+
+    strFormat = strFormat.replace(/MM/, m);
+    strFormat = strFormat.replace(/SS/, s);
+    strFormat = strFormat.replace(/XX/, ms.toString().slice(0, 2));
+
+    return strFormat;
   }
 }]);
