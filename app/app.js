@@ -2,7 +2,12 @@
 
 // Defining Angular app model with all other dependent modules
 var mostPopularListingsApp = angular.module('mostPopularListingsApp', ['ngRoute',
-  'mostPopularListingsApp.home', 'mostPopularListingsApp.about', 'mostPopularListingsApp.login'
+  'mostPopularListingsApp.home', 'mostPopularListingsApp.about', 'mostPopularListingsApp.login',
+  'com.2fdevs.videogular',
+  'com.2fdevs.videogular.plugins.controls',
+  'com.2fdevs.videogular.plugins.overlayplay',
+  'com.2fdevs.videogular.plugins.buffering',
+  'com.2fdevs.videogular.plugins.poster'
 ]);
 
 mostPopularListingsApp.config(function($routeProvider, $locationProvider, $httpProvider) {

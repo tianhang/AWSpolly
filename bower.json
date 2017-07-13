@@ -7,9 +7,16 @@
   "dependencies": {
     "angular": "1.5.x",
     "angular-route": "1.5.x",
-    "angular-mocks": "1.5.x"
+    "angular-mocks": "1.5.x",
+    "videogular": "1.2.5",
+    "videogular-controls": "1.2.5",
+    "videogular-buffering": "1.2.5",
+    "videogular-overlay-play": "1.2.5",
+    "videogular-poster": "1.2.5",
+    "videogular-themes-default": "^1.4.4"
   },
   "resolutions": {
-    "angular": "1.5.x"
+    "angular": "1.5.x",
+    "videogular": "~1.4.4"
   }
 }
