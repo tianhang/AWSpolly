@@ -68,9 +68,11 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
     }
   }
 
+  var SERVER_IP = "192.168.0.69"
+
   function getSpeechMark(txt) {
     var conf = {
-      url: "http://localhost:3000/marks",
+      url: "http://" + SERVER_IP + ":3000/marks",
       method: 'POST',
       data: { text: txt }
     }
@@ -115,11 +117,17 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
     return prefix + text + suffix;
   }
 
+  function clearAudio() {
+    self.config.sources = null;
+    self.config.cuePoints.console = [];
+  }
+
   $scope.uploadText = function() {
     console.log($scope.text);
     self.loading = true;
+    clearAudio();
     //var API = "http://vop.baidu.com/server_api";
-    var API = "http://localhost:3000/tts";
+    var API = "http://" + SERVER_IP + ":3000/tts";
     var token = self.access_token;
     var text = $scope.text;
     //提交到服务器
