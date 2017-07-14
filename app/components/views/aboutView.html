@@ -7,7 +7,7 @@
   .highlight {
     color: green;
     font-weight: bold;
-    font-size: 20px;
+    font-size: 17px;
   }
 </style>
 
@@ -20,7 +20,7 @@
     <button ng-click="uploadText()" type="button" value="提交">提交</button>
   </div>
   <h1>Voice</h1>
-
+  <div class="loading" ng-if="ctrl.loading">Loading&#8230;</div>
   <audio id="myVideo" controls ng-src="{{result}}" style="margin-bottom:10%;"></audio>
   <!--<button ng-click="playRecording()" type="button" value="播放">播放</button>
   <span>{{subtitle}}</span>-->
@@ -30,7 +30,6 @@
     <div class="row">
       <div class="col-12">
         <h2>Video player</h2>
-
         <div class="videogular-container">
           <videogular vg-player-ready="ctrl.onPlayerReady($API)" vg-theme="ctrl.config.theme.url" vg-cue-points="ctrl.config.cuePoints">
             <vg-media vg-src="ctrl.config.sources" vg-tracks="ctrl.config.tracks">
@@ -51,26 +50,18 @@
               </vg-volume>
               <vg-fullscreen-button></vg-fullscreen-button>
             </vg-controls>
-
             <vg-poster vg-url='ctrl.config.plugins.poster.url'></vg-poster>
             <vg-buffering></vg-buffering>
             <vg-overlay-play></vg-overlay-play>
           </videogular>
-
-          <select ng-model="ctrl.chapterSelected" ng-options="chapter.params as chapter.params.label for chapter in ctrl.config.cuePoints.chapters track by chapter.params.value" ng-change="ctrl.onChangeChapter()">
-                    <option value="">Select chapter</option>
-                </select>
-
-          <p ng-bind="ctrl.consoleCuePointsMessages"></p>
-
           <div class="animable barChart my-show-hide-animation" ng-style="ctrl.barChartStyle"></div>
-          <h2 class="animable text my-show-hide-animation" ng-style="ctrl.textStyle">TEXT</h2>
+
         </div>
       </div>
     </div>
-    -{{ctrl.currIdx}}
     <div id="lyrics" class="row" style="margin-top: 50px;" ng-if="ctrl.markList">
-      <span ng-repeat="item in ctrl.markList" ng-class="{'highlight':ctrl.currIdx == $index}">
+      <h2 class="animable text my-show-hide-animation" ng-style="ctrl.textStyle">TEXT</h2>
+      <span ng-repeat="item in ctrl.markList" ng-class="{'highlight':((ctrl.currIdx - $index < 10) && (ctrl.currIdx - $index >= 0))}">
         {{item.value}}
       </span>
     </div>

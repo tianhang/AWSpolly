@@ -23,28 +23,7 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
 // Controller definition for this module
 .controller('AboutController', ['$scope', '$http', '$sce', '$interval', function($scope, $http, $sce, $interval) {
 
-  // Just a housekeeping.
-  // In the init method we are declaring all the
-  // neccesarry settings and assignments to be run once
-  // controller is invoked
   var self = this;
-
-
-
-  function getCuePoint(startSec, msg, idx, func) {
-    func = func || self.onConsoleCuePoint;
-    //console.log(func);
-    return {
-      timeLapse: {
-        start: startSec,
-      },
-      onEnter: self.onConsoleCuePoint.bind(self),
-      params: {
-        message: msg,
-        id: idx
-      }
-    }
-  }
 
   function initMp3(url, lrc) {
     //getAccessToken();
@@ -69,23 +48,25 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
   };
 
 
-
-
-  function getAccessToken() {
-    var conf = {
-      url: "http://localhost:5000/getToken",
-      method: 'GET',
-    }
-    $http(conf).then(function(data) {
-      console.log("token:", data.data.access_token);
-      self.access_token = data.data.access_token;
-    }, function(error) {
-      console.log(error);
-    });
-  }
   var markMap = {};
 
   self.speechText = "";
+
+
+  function getCuePoint(startSec, msg, idx, func) {
+    func = func || self.onConsoleCuePoint;
+    //console.log(func);
+    return {
+      timeLapse: {
+        start: startSec,
+      },
+      onEnter: self.onConsoleCuePoint.bind(self),
+      params: {
+        message: msg,
+        id: idx
+      }
+    }
+  }
 
   function getSpeechMark(txt) {
     var conf = {
@@ -117,23 +98,10 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
             var lyTime = formatSeconds(tm / 1000);
             var item = "[" + lyTime + "]" + obj.value + "\n";
             lyricsStr += item;
-
-            // var spanNode = document.createElement("span");
-            // spanNode.id = idx;
-            // spanNode.innerText = obj.value + " ";
-            // dom.appendChild(spanNode);
-            //var text = "<span id='" + idx + "'>" + obj.value + "</span>";
-            //self.speechText += text;
+            self.loading = false;
           }
         }
       });
-
-
-      console.log(self.config.cuePoints);
-
-      //console.log(lyricsStr);
-      console.log("--mark map--");
-      console.log(markMap);
       initMp3($scope.result, lyricsStr);
       console.log("----");
     }, function(error) {
@@ -141,16 +109,22 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
     });
   }
 
-
+  function text2SSML(text) {
+    var prefix = "<speak><prosody rate='x-slow'>";
+    var suffix = "</prosody></speak>";
+    return prefix + text + suffix;
+  }
 
   $scope.uploadText = function() {
     console.log($scope.text);
+    self.loading = true;
     //var API = "http://vop.baidu.com/server_api";
     var API = "http://localhost:3000/tts";
     var token = self.access_token;
     var text = $scope.text;
     //提交到服务器
-
+    text = text2SSML(text);
+    console.log(text);
     uploadFile(API, token, text, function(state, e) {
       switch (state) {
         case 'uploading':
@@ -158,28 +132,20 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
           console.log(percentComplete);
           break;
         case 'ok':
-          //alert(e.target.responseText);
-          //alert(e.target.responseText);
+
           $scope.$apply(function() {
-            //console.log(e.target.responseText);
-            //$scope.result = window.URL.createObjectURL(e.target.responseText);
+
             var base64 = "data:audio/mpeg;base64,";
             $scope.result = base64 + e.target.responseText;
-
-            //           this.media = [{
-            // sources: [{
-            //   src: $sce.trustAsResourceUrl("http://static.videogular.com/assets/audios/videogular.mp3"),
-            //   type: "audio/mpeg"
-            // }, ],
             self.media[0].sources[0].src = $scope.result;
             self.config.sources = self.media[0].sources;
             console.log(self.config);
-            //console.log($scope.result);
+            //console.log($scope.result); 
             getSpeechMark(text);
           });
           console.log("上传成功");
           console.log(e);
-          alert("上传成功");
+          //alert("上传成功");
           break;
         case 'error':
           alert("上传失败");
@@ -257,24 +223,6 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
     }]
   }];
 
-  // Console
-  this.onConsoleCuePoint = function onConsoleCuePoint(currentTime, timeLapse, params) {
-    //var percent = (currentTime - timeLapse.start) * 100 / (timeLapse.end - timeLapse.start);
-    //self.consoleCuePointsMessages = "time: " + currentTime + " -> (start/end/percent) " + timeLapse.start + "/" + timeLapse.end + "/" + percent + "% = " + params.message + "\n";
-    //self.consoleCuePointsMessages = "cue time: " + timeLapse.start + "/" + params.message + "\n";
-    console.log(currentTime);
-    console.log("cue time: " + timeLapse.start + "/" + params.message + "\n");
-    self.consoleCuePointsMessages = params.message;
-    console.log(params.message);
-    var id = params.id;
-    self.currIdx = id;
-
-  };
-
-
-
-
-
   this.config = {
     playsInline: false,
     autoHide: false,
@@ -289,67 +237,22 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
       url: "resources/bower/videogular-themes-default/videogular.css"
     },
     cuePoints: {
-      console: [
-        // {
-        //   timeLapse: {
-        //     start: 2
-        //   },
-        //   onEnter: this.onConsoleCuePoint.bind(this),
-        //   //onLeave: this.onConsoleCuePoint.bind(this),
-        //   //onUpdate: this.onConsoleCuePoint.bind(this),
-        //   //onComplete: this.onConsoleCuePoint.bind(this),
-        //   params: {
-        //     message: "you can change cue points on the fly!"
-        //   }
-        // },
-        // {
-        //   timeLapse: {
-        //     start: 3
-        //   },
-        //   onEnter: this.onConsoleCuePoint.bind(this),
-        //   //onLeave: this.onConsoleCuePoint.bind(this),
-        //   //onUpdate: this.onConsoleCuePoint.bind(this),
-        //   //onComplete: this.onConsoleCuePoint.bind(this),
-        //   params: {
-        //     message: "because cue points are awesome!"
-        //   }
-        // },
-        // {
-        //   timeLapse: {
-        //     start: 4
-        //   },
-        //   onEnter: this.onConsoleCuePoint.bind(this),
-        //   //onLeave: this.onConsoleCuePoint.bind(this),
-        //   //onUpdate: this.onConsoleCuePoint.bind(this),
-        //   //onComplete: this.onConsoleCuePoint.bind(this),
-        //   params: {
-        //     message: "yay!! ^_^"
-        //   }
-        // }
-      ],
-      thumbnails: [{
-          timeLapse: {
-            start: 30
-          },
-          params: {
-            thumbnail: "assets/thumbnails/30.png"
-          }
-        },
-        {
-          timeLapse: {
-            start: 49,
-            end: 60
-          },
-          params: {
-            thumbnail: "assets/thumbnails/50.png"
-          }
-        }
-      ]
+      console: [],
     },
-    plugins: {
-      poster: {
-        url: "assets/images/videogular.png"
-      }
-    }
   };
+
+
+
+  // Console
+  this.onConsoleCuePoint = function onConsoleCuePoint(currentTime, timeLapse, params) {
+
+    console.log(currentTime);
+    //console.log("cue time: " + timeLapse.start + "/" + params.message + "\n");
+    self.consoleCuePointsMessages = params.message;
+    console.log(params.message);
+    var id = params.id;
+    self.currIdx = id;
+
+  };
+
 }]);
