@@ -9,6 +9,9 @@
     font-weight: bold;
     font-size: 17px;
   }
+  /*input {
+    float: left;
+  }*/
 </style>
 
 <div class="center" style="height:1200px;" ng-controller="AboutController as ctrl">
@@ -17,7 +20,14 @@
     <div>
       <textarea ng-model="text"></textarea>
     </div>
-    <button ng-click="uploadText()" type="button" value="Submit">Submit</button>
+    <div>
+      <input type="radio" name="type" value="sentence" ng-model="ctrl.punctuation">Sentence <br>
+      <input type="radio" name="type" value="word" ng-model="ctrl.punctuation">Word
+    </div>
+
+    <div>
+      <button ng-click="uploadText()" type="button" value="Submit">Submit</button>
+    </div>
   </div>
   <h1>Voice</h1>
   <div class="loading" ng-if="ctrl.loading">Loading&#8230;</div>
@@ -59,9 +69,15 @@
         </div>
       </div>
     </div>
-    <div id="lyrics" class="row" style="margin-top: 50px;" ng-if="ctrl.markList">
+    <div id="lyrics" class="row" style="margin-top: 50px;" ng-if="ctrl.markList && ctrl.punctuation == 'word'">
       <h2 class="animable text my-show-hide-animation" ng-style="ctrl.textStyle">TEXT</h2>
       <span ng-repeat="item in ctrl.markList" ng-class="{'highlight':((ctrl.currIdx - $index < 10) && (ctrl.currIdx - $index >= 0))}">
+        {{item.value}}
+      </span>
+    </div>
+    <div id="lyrics" class="row" style="margin-top: 50px;" ng-if="ctrl.markList && ctrl.punctuation == 'sentence'">
+      <h2 class="animable text my-show-hide-animation" ng-style="ctrl.textStyle">TEXT</h2>
+      <span ng-repeat="item in ctrl.markList" ng-class="{'highlight':ctrl.currIdx == $index}">
         {{item.value}}
       </span>
     </div>

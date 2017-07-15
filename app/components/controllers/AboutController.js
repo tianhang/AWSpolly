@@ -24,6 +24,7 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
 .controller('AboutController', ['$scope', '$http', '$sce', '$interval', function($scope, $http, $sce, $interval) {
 
   var self = this;
+  self.punctuation = 'word';
 
   function initMp3(url, lrc) {
     //getAccessToken();
@@ -68,7 +69,8 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
     }
   }
 
-  var SERVER_IP = "192.168.0.69"
+  //var SERVER_IP = "192.168.0.69"
+  var SERVER_IP = "localhost"
 
   function getSpeechMark(txt) {
     var conf = {
@@ -90,7 +92,7 @@ angular.module('mostPopularListingsApp.about', ['ngRoute', 'com.2fdevs.videogula
         if (item.length) {
           var obj = JSON.parse(item);
           // || obj.type == "word"
-          if (obj.type == "word") {
+          if (obj.type == self.punctuation) {
             var tm = parseInt(obj.time)
             self.markList.push(obj);
             self.config.cuePoints.console.push(getCuePoint(obj.time / 1000, obj.value, idx));
